@@ -4,16 +4,17 @@
 	Project: http://www.github.com/twl/kyra
 */
 
-#include "../stdafx.h"
+#include "../StdAfx.h"
+using namespace boost::system;
 
-namespace kyra
+namespace fbi
 {
 	namespace irc
 	{
-		connection::connection(boost::asio::io_service& ios, std::string ircHost, unsigned short port, std::string nick, std::string user) 
+		connection::connection(boost::asio::io_service& ios, string ircHost, unsigned short port, string nick, string user) 
 			: io_service(ios), resolver(ios), socket(ios), sent_registering_packets(false)
 		{
-			std::cout << "Initializing" << std::endl;
+			cout << "Initializing" << endl;
 			
 			m_irc_host = ircHost;
 			m_irc_port = port;
@@ -37,27 +38,27 @@ namespace kyra
 				boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 				boost::asio::ip::tcp::resolver::iterator end;
 
-				boost::system::error_code error = boost::asio::error::host_not_found;
+				error_code error = boost::asio::error::host_not_found;
 
-				std::cout << "Connecting..." << std::endl;
+				cout << "Connecting..." << endl;
 
 				while(error && endpoint_iterator != end)
 				{
 					boost::asio::ip::tcp::endpoint ep = endpoint_iterator->endpoint();
-					std::cout << ep.address().to_string() << ":" << ep.port() << std::endl;
+					cout << ep.address().to_string() << ":" << ep.port() << endl;
 					ep.port(m_irc_port);
 					socket.close();
 					socket.connect(ep, error);
 					endpoint_iterator++;
 				}
 				if(error)
-					throw boost::system::system_error(error);
+					throw system_error(error);
 
 				flush();
 				sending = false;
 				connection_status = status::connected;
 
-				std::cout << "Connected." << std::endl;
+				cout << "Connected." << endl;
 
 				addHandler("376", boost::bind(&connection::handle_registered, shared_from_this(), _1));
 
@@ -91,7 +92,7 @@ namespace kyra
 				io_service.run_one();
 		}
 
-		void connection::send(int priority, const std::string& message)
+		void connection::send(int priority, const string& message)
 		{
 			net_message msg(priority, message);
 
@@ -111,12 +112,12 @@ namespace kyra
 			}
 		}
 
-		void connection::send_finished(boost::system::error_code const& ec)
+		void connection::send_finished(error_code const& ec)
 		{
 			if(ec)
 			{
 				disconnect();
-				throw boost::system::system_error(ec);
+				throw system_error(ec);
 			}
 
 			sending = false;
@@ -130,16 +131,16 @@ namespace kyra
 				boost::asio::placeholders::error));
 		}
 
-		void connection::receive_finished(boost::system::error_code const& ec)
+		void connection::receive_finished(error_code const& ec)
 		{
 			if(ec)
 			{
 				disconnect();
-				throw boost::system::system_error(ec);
+				throw system_error(ec);
 			}
 
-			std::istream is(&inc_buffer);
-			std::getline(is, lastLine);
+			istream is(&inc_buffer);
+			getline(is, lastLine);
 			receive();
 			io_service.dispatch(boost::bind(on_message, lastLine));
 		}
@@ -164,28 +165,28 @@ namespace kyra
 			return connection_status;
 		}
 
-		std::string connection::irc_host() const
+		string connection::irc_host() const
 		{
 			return m_irc_host;
 		}
 
-		void connection::irc_host(std::string ircHost)
+		void connection::irc_host(string ircHost)
 		{
 			m_irc_host = ircHost;
 		}
 
-		void connection::handle_data(std::string const& data)
+		void connection::handle_data(string const& data)
 		{
 
 			handle_message(data);
 
 			if(!sent_registering_packets)
 			{
-				std::string nickmsg = (boost::format("NICK %1%") % m_nick).str();
-				std::string usermsg = (boost::format("USER %1% 8 * :%1%") % m_user).str();
+				string nickmsg = (boost::format("NICK %1%") % m_nick).str();
+				string usermsg = (boost::format("USER %1% 8 * :%1%") % m_user).str();
 
-				std::cout << nickmsg << std::endl;
-				std::cout << usermsg << std::endl << std::endl;
+				cout << nickmsg << endl;
+				cout << usermsg << endl << endl;
 
 				send(10, nickmsg);
 				send(9, usermsg);
@@ -193,15 +194,15 @@ namespace kyra
 				sent_registering_packets = true;
 			}
 
-			std::cout << data << std::endl;
+			cout << data << endl;
 		}
 
-		void connection::raw_write(std::string data)
+		void connection::raw_write(string data)
 		{
 			boost::asio::write(socket, boost::asio::buffer(data));
 		}
 
-		void connection::addHandler(std::string opcode, opcode_handler handler)
+		void connection::addHandler(string opcode, opcode_handler handler)
 		{
 			handlers[opcode] = handler;
 		}
@@ -219,13 +220,13 @@ namespace kyra
 
 		void connection::handle_ping(message const& msg)
 		{
-			std::string response = (boost::format("PONG %1%") % msg.args).str();
-			std::cout << response << std::endl;
+			string response = (boost::format("PONG %1%") % msg.args).str();
+			cout << response << endl;
 
 			send(10, response);
 		}
 	
-		void connection::handle_message(std::string info)
+		void connection::handle_message(string info)
 		{
 			message mess;
 
@@ -269,7 +270,7 @@ namespace kyra
 						mess.args = match[4];
 
 						// split hostmask
-						unsigned int pos = (mess.hostmask.find('!'));
+						uint32 pos = (mess.hostmask.find('!'));
 						mess.nick = mess.hostmask.substr(0, pos);
 						mess.host = mess.hostmask.substr(pos + 1);
 
@@ -279,8 +280,8 @@ namespace kyra
 					}
 					else
 					{
-						//throw std::exception("IRC message could not be parsed.");
-						std::cerr << "Could not parse IRC message!!" << std::endl;
+						//throw exception("IRC message could not be parsed.");
+						cerr << "Could not parse IRC message!!" << endl;
 						return;
 					}
 				}
@@ -292,22 +293,21 @@ namespace kyra
 			try
 			{
 				int opcode = boost::lexical_cast<int>(mess.opcode);
-				std::cout << "opcode: " << opcode << std::endl;
+				cout << "opcode: " << opcode << endl;
 			}
 			catch(boost::bad_lexical_cast&)
 			{
 
 			}
 
-			boost::unordered_map<std::string, opcode_handler>::iterator it = handlers.find(mess.opcode);
+			boost::unordered_map<string, opcode_handler>::iterator it = handlers.find(mess.opcode);
 			if(it == handlers.end())
 			{
-				std::cout << "Unhandled opcode: " << mess.opcode << std::endl;
+				cout << "Unhandled opcode: " << mess.opcode << endl;
 				return;
 			}
 
 			(it->second)(mess); // call the handler
-
 		}
 	}
 }

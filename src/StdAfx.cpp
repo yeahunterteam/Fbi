@@ -4,5 +4,4 @@
 	Project: http://www.github.com/twl/kyra
 */
 
-#include "stdafx.h"
-
+#include "StdAfx.h"

@@ -4,9 +4,11 @@
 	Project: http://www.github.com/twl/kyra
 */
 
+#ifndef _STDAFX_H
+#define _STDAFX_H
+
 #pragma once
 #pragma warning(disable: 4512) // triggered within Boost.
-
 
 #if defined(_WIN32)
 #include "targetver.h"
@@ -29,11 +31,25 @@
 #include <boost/unordered_map.hpp>
 #include <boost/regex.hpp>
 
-/*using namespace std;
-using std::string;*/
+#include <boost/cstdint.hpp>
+
+typedef boost::int8_t int8;
+typedef boost::int16_t int16;
+typedef boost::int32_t int32;
+typedef boost::int64_t int64;
+
+typedef boost::uint8_t uint8;
+typedef boost::uint16_t uint16;
+typedef boost::uint32_t uint32;
+typedef boost::uint64_t uint64;
+
+using namespace std;
+//using std::string;
 
 /* project */
+#include "SharedPointer.hpp"
 #include "irc/irc_replies.hpp"
 #include "irc/irc_message.hpp"
 #include "irc/irc_connection.hpp"
 
+#endif

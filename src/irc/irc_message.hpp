@@ -11,9 +11,9 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "../stdafx.h"
+#include "../StdAfx.h"
 
-namespace kyra
+namespace fbi
 {
 	namespace irc
 	{
@@ -21,17 +21,17 @@ namespace kyra
 
 		struct message
 		{
-			std::string hostmask;
-			std::string opcode;
-			std::string channel;
-			std::string args;	
+			string hostmask;
+			string opcode;
+			string channel;
+			string args;	
 
-			// split from :abyss!abyss@abyss.the.host
-			std::string nick; // abyss
-			std::string user; // abyss
-			std::string host; // abyss.the.host
+			// split from :fbi!fbi@fbi.the.host
+			string nick; // fbi
+			string user; // fbi
+			string host; // fbi.the.host
 
-			std::string full;
+			string full;
 			boost::shared_ptr<connection> connection;
 		};
 
@@ -43,14 +43,14 @@ namespace kyra
 				message = "";
 			}
 			
-			net_message(int priority, std::string msg)
+			net_message(int priority, string msg)
 			{
 				this->priority = priority;
 				message = msg + "\r\n";
 			}
 
 			int priority;
-			std::string message;
+			string message;
 
 			bool operator <(const net_message& other) const
 			{
