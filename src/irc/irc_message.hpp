@@ -4,14 +4,8 @@
 	Project: http://www.github.com/twl/kyra
 */
 
-#ifndef _KYRA_IRC_MESSAGE
-#define _KYRA_IRC_MESSAGE
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1200)
-# pragma once
-#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
-
-#include "../StdAfx.h"
+#ifndef _IRC_MESSAGE
+#define _IRC_MESSAGE
 
 namespace fbi
 {

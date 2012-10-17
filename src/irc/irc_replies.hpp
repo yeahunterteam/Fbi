@@ -7,8 +7,6 @@
 #ifndef _IRC_REPLIES
 #define _IRC_REPLIES
 
-#pragma once
-
 namespace fbi
 {
 	namespace irc

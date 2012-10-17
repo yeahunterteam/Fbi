@@ -18,6 +18,8 @@
 #include <cstring>
 #include <iostream>
 #include <queue>
+#include <deque>
+#include <set>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -30,6 +32,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/regex.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 
 #include <boost/cstdint.hpp>
 
@@ -51,5 +55,9 @@ using namespace std;
 #include "irc/irc_replies.hpp"
 #include "irc/irc_message.hpp"
 #include "irc/irc_connection.hpp"
+#include "network/types.hpp"
+#include "network/participant.hpp"
+#include "network/session.hpp"
+#include "network/server.hpp"
 
 #endif

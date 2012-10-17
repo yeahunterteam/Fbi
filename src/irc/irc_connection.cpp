@@ -51,6 +51,7 @@ namespace fbi
 					socket.connect(ep, error);
 					endpoint_iterator++;
 				}
+
 				if(error)
 					throw system_error(error);
 
@@ -95,7 +96,6 @@ namespace fbi
 		void connection::send(int priority, const string& message)
 		{
 			net_message msg(priority, message);
-
 			out_queue.push(msg);
 			send();
 		}
@@ -106,8 +106,8 @@ namespace fbi
 			{
 				current_message = out_queue.top();
 				out_queue.pop();
-				boost::asio::async_write(socket, boost::asio::buffer(current_message.message), boost::bind(&connection::send_finished, shared_from_this(), 
-					boost::asio::placeholders::error));
+				boost::asio::async_write(socket, boost::asio::buffer(current_message.message), boost::bind(&connection::send_finished,
+					shared_from_this(), boost::asio::placeholders::error));
 				sending = true;
 			}
 		}
@@ -177,7 +177,6 @@ namespace fbi
 
 		void connection::handle_data(string const& data)
 		{
-
 			handle_message(data);
 
 			if(!sent_registering_packets)
@@ -233,7 +232,6 @@ namespace fbi
 			boost::regex firstRegex("^[:](\\S+)\\s(\\S+|\\d+)\\s(\\S+)\\s(\\S+)\\s[:](.+)");
 			boost::cmatch match;
 
-			
 			if(boost::regex_search(info.c_str(), match, firstRegex))
 			{
 				mess.full = info;
