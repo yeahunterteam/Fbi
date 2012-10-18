@@ -51,6 +51,9 @@ using namespace std;
 //using std::string;
 
 /* project */
+#include "Log.hpp"
+extern fbi::CLog Log;
+#include "Fbi.hpp"
 #include "SharedPointer.hpp"
 #include "irc/irc_replies.hpp"
 #include "irc/irc_message.hpp"

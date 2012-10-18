@@ -9,9 +9,21 @@ using namespace boost::asio;
 using namespace fbi;
 using namespace fbi::irc;
 using namespace fbi::network;
+CLog Log;
 
 int main(/*int argc, char* argv[]*/)
 {
+	Log.Init(3);
+	Log.Color(TBLUE);
+	cout << "Fbi verzió: " << Version << endl;
+	cout << "A program célja a megadott irc szerverhez/szerverekhez való kapcsolódás." << endl;
+	cout << "Továbbá fogadni az adatokat az fbi project másik részétől." << endl;
+	cout << "A program leállításához használja a ctrl+c billentyűkombinációt." << endl;
+	cout << "================================================================================" << endl << endl; // 80
+	Log.Color(TNORMAL);
+
+	Log.Notice("Main", "Program indul...");
+
 	io_service ioserver;
 	boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 6009);
 	boost::shared_ptr<server> serv(new server(ioserver, endpoint));

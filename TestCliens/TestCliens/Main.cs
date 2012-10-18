@@ -36,6 +36,7 @@ namespace TestCliens
 						Console.WriteLine(inputLine);
 						writer.WriteLine("PASS csá");
 						writer.Flush();
+						Thread.Sleep(1000);
 					}
 
 					writer.Close();

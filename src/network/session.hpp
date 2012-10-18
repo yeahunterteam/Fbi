@@ -19,7 +19,7 @@ namespace fbi
 
 			static const int PingInterval = 300; // 5 miniutes
 
-			tcp::socket & GetSocket()
+			tcp::socket& GetSocket()
 			{
 				return socket_;
 			}
