@@ -28,7 +28,7 @@ namespace fbi
 
 		void server::run()
 		{
-			io_service.run();
+			//boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 		}
 
 		server::~server()

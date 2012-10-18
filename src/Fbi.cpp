@@ -9,6 +9,7 @@ using namespace boost::asio;
 using namespace fbi;
 using namespace fbi::irc;
 using namespace fbi::network;
+using boost::asio::ip::tcp;
 CLog Log;
 
 int main(/*int argc, char* argv[]*/)
@@ -24,17 +25,22 @@ int main(/*int argc, char* argv[]*/)
 
 	Log.Notice("Main", "Program indul...");
 
-	io_service ioserver;
-	boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 6009);
-	boost::shared_ptr<server> serv(new server(ioserver, endpoint));
-	ioserver.run();
+	io_service ios;
+	boost::shared_ptr<server> s(new server(ios, tcp::endpoint(tcp::v4(), 6009)));
+	boost::thread t(boost::bind(&boost::asio::io_service::run, &ios));
 
-	/*io_service io;
+	cout << "asd" << endl;
+
+	io_service io;
 	ConnectionPointer conn(new connection(io, "irc.rizon.net", 6667, "Kyrax", "Kyrax"));
 	conn->run();
 	conn->connect();
-	io.run();
+	boost::thread t2(boost::bind(&boost::asio::io_service::run, &io));
 
-	cin.get();*/
+	cin.get();
+
+	for(;;)
+		Sleep(2000);
+
 	return 0;
 }
