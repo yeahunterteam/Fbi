@@ -12,6 +12,58 @@ using namespace fbi::network;
 using boost::asio::ip::tcp;
 CLog Log;
 
+void _OnSignal(int s)
+{
+	switch(s)
+	{
+	case SIGHUP:
+		break;
+	case SIGINT:
+	case SIGTERM:
+	case SIGABRT:
+		// majd aminek le kell futnia
+		main_shutdown_manager.shutdown();
+		break;
+	}
+
+	signal(s, _OnSignal);
+}
+
+void segfault_handler(int c)
+{
+	Log.Warning("Crash", "Segfault handler elindult...");
+
+	// majd ami lefut
+
+	Log.Notice("Crash", "Program leáll...");
+	abort();
+}
+
+void _HookSignals()
+{
+	Log.Notice("Signals", "Hooking signals...");
+	signal(SIGINT, _OnSignal);
+	signal(SIGTERM, _OnSignal);
+	signal(SIGABRT, _OnSignal);
+	signal(SIGHUP, _OnSignal);
+	signal(SIGUSR1, _OnSignal);
+
+	// crash handler
+	signal(SIGSEGV, segfault_handler);
+	signal(SIGFPE, segfault_handler);
+	signal(SIGILL, segfault_handler);
+	signal(SIGBUS, segfault_handler);
+}
+
+void _UnhookSignals()
+{
+	Log.Notice("Signals", "Unhooking signals...");
+	signal(SIGINT, 0);
+	signal(SIGTERM, 0);
+	signal(SIGABRT, 0);
+	signal(SIGHUP, 0);
+}
+
 int main(/*int argc, char* argv[]*/)
 {
 	Log.Init(3);
@@ -24,12 +76,11 @@ int main(/*int argc, char* argv[]*/)
 	Log.Color(TNORMAL);
 
 	Log.Notice("Main", "Program indul...");
+	_HookSignals();
 
 	io_service ios;
-	boost::shared_ptr<server> s(new server(ios, tcp::endpoint(tcp::v4(), 6009)));
+	ServerPointer s(new server(ios, tcp::endpoint(tcp::v4(), 6009)));
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &ios));
-
-	cout << "asd" << endl;
 
 	io_service io;
 	ConnectionPointer conn(new connection(io, "irc.rizon.net", 6667, "Kyrax", "Kyrax"));
@@ -37,10 +88,12 @@ int main(/*int argc, char* argv[]*/)
 	conn->connect();
 	boost::thread t2(boost::bind(&boost::asio::io_service::run, &io));
 
-	cin.get();
+	//cin.get();
 
-	for(;;)
-		Sleep(2000);
+	main_shutdown_manager.wait();
+	ios.stop();
+	io.stop();
+	_UnhookSignals();
 
 	return 0;
 }

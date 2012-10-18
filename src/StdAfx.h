@@ -20,6 +20,7 @@
 #include <queue>
 #include <deque>
 #include <set>
+#include <signal.h>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -35,6 +36,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/thread/condition.hpp>
 
 #include <boost/cstdint.hpp>
 
@@ -49,13 +51,14 @@ typedef boost::uint32_t uint32;
 typedef boost::uint64_t uint64;
 
 using namespace std;
-//using std::string;
+using std::string;
 
 /* project */
 #include "Log.hpp"
 extern fbi::CLog Log;
 #include "Fbi.hpp"
 #include "SharedPointer.hpp"
+#include "shutdown_manager.hpp"
 #include "irc/irc_replies.hpp"
 #include "irc/irc_message.hpp"
 #include "irc/irc_connection.hpp"

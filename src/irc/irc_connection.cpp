@@ -6,6 +6,7 @@
 
 #include "../StdAfx.h"
 using namespace boost::system;
+using boost::asio::ip::tcp;
 
 namespace fbi
 {
@@ -14,7 +15,7 @@ namespace fbi
 		connection::connection(boost::asio::io_service& ios, string ircHost, unsigned short port, string nick, string user) 
 			: io_service(ios), resolver(ios), socket(ios), sent_registering_packets(false)
 		{
-			cout << "Initializing" << endl;
+			Log.Notice("Connection", "Irc rész indítása.");
 			
 			m_irc_host = ircHost;
 			m_irc_port = port;
@@ -26,7 +27,7 @@ namespace fbi
 
 		void connection::connect()
 		{
-			/*boost::asio::ip::tcp::resolver::query query(m_irc_host, m_irc_service);
+			/*tcp::resolver::query query(m_irc_host, m_irc_service);
 			resolver.async_resolve(query, boost::bind(&connection::handle_resolve, shared_from_this(), boost::asio::placeholders::error
 				, boost::asio::placeholders::iterator));*/
 
@@ -34,17 +35,17 @@ namespace fbi
 
 			try
 			{
-				boost::asio::ip::tcp::resolver::query query(m_irc_host, "0");
-				boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-				boost::asio::ip::tcp::resolver::iterator end;
+				tcp::resolver::query query(m_irc_host, "0");
+				tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+				tcp::resolver::iterator end;
 
 				error_code error = boost::asio::error::host_not_found;
 
-				cout << "Connecting..." << endl;
+				Log.Notice("Connection", "Kapcsolódás a szerverhez.");
 
 				while(error && endpoint_iterator != end)
 				{
-					boost::asio::ip::tcp::endpoint ep = endpoint_iterator->endpoint();
+					tcp::endpoint ep = endpoint_iterator->endpoint();
 					cout << ep.address().to_string() << ":" << ep.port() << endl;
 					ep.port(m_irc_port);
 					socket.close();
@@ -59,7 +60,7 @@ namespace fbi
 				sending = false;
 				connection_status = status::connected;
 
-				cout << "Connected." << endl;
+				Log.Success("Connection", "Kapcsolódás sikeres.");
 
 				addHandler("376", boost::bind(&connection::handle_registered, shared_from_this(), _1));
 
@@ -157,6 +158,7 @@ namespace fbi
 				socket.close();
 				connection_status = status::not_connected;
 				io_service.dispatch(on_disconnect);
+				Log.Warning("Connection", "Kapcsolat bontásra került!");
 			}
 		}
 
@@ -209,11 +211,9 @@ namespace fbi
 		void connection::handle_registered(message const& msg)
 		{
 			// register others
-
 			addHandler(replies::ping, boost::bind(&connection::handle_ping, shared_from_this(), _1));
 
 			// join channels
-
 			msg.connection->send(1, (boost::format("JOIN %1%") % "#hun_bot").str());
 		}
 
@@ -278,8 +278,7 @@ namespace fbi
 					}
 					else
 					{
-						//throw exception("IRC message could not be parsed.");
-						cerr << "Could not parse IRC message!!" << endl;
+						Log.Error("Connection", "Nem sikerült az irc üzenetet szétvágni!");
 						return;
 					}
 				}
@@ -301,7 +300,7 @@ namespace fbi
 			boost::unordered_map<string, opcode_handler>::iterator it = handlers.find(mess.opcode);
 			if(it == handlers.end())
 			{
-				cout << "Unhandled opcode: " << mess.opcode << endl;
+				Log.Notice("Connection", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode);
 				return;
 			}
 

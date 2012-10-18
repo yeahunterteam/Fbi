@@ -11,6 +11,8 @@ namespace fbi
 {
 	namespace irc
 	{
+		using boost::asio::ip::tcp;
+
 		struct status
 		{
 			static const int not_connected = 0;
@@ -49,7 +51,7 @@ namespace fbi
 			void addHandler(string opcode, opcode_handler handler);
 
 		protected:
-			void handle_resolve(boost::system::error_code const&, boost::asio::ip::tcp::resolver::iterator);
+			void handle_resolve(boost::system::error_code const&, tcp::resolver::iterator);
 			void handle_connect(boost::system::error_code const&);
 			void handle_read(boost::system::error_code const&, size_t);
 
@@ -67,8 +69,8 @@ namespace fbi
 			void send_finished(boost::system::error_code const& ec);
 
 			boost::asio::io_service& io_service;
-			boost::asio::ip::tcp::resolver resolver;
-			boost::asio::ip::tcp::socket socket;
+			tcp::resolver resolver;
+			tcp::socket socket;
 			boost::asio::streambuf inc_buffer;
 
 			priority_queue<net_message> out_queue;

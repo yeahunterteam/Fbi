@@ -29,8 +29,7 @@ namespace fbi
 				if(!error)
 				{
 					current_session->Start();
-					// hiba megoldása itt!!!
-					boost::shared_ptr<Session> new_session(new Session(io_service));
+					SessionPointer new_session(new Session(io_service));
 					acceptor.async_accept(new_session->GetSocket(), boost::bind(&server::handleaccept, this, new_session,
 						boost::asio::placeholders::error));
 				}

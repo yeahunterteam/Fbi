@@ -13,7 +13,8 @@ namespace fbi
 		Session::Session(boost::asio::io_service& io_service) : socket_(io_service), initialized_(false), authorized_(false),
 			register_timeout_(io_service), connection_timeout_(io_service), closing_connection_(false), ping_sent_(false)
 		{
-
+			Log.Notice("Session", "Session indul...");
+			Log.Notice("Session", "Összes handler regisztrálása.");
 			registration_handlers_["CONNECT"] = &Session::MessageConnect;
 			message_handlers_["ASDD"] = &Session::MessageIgnore;
 			/*message_handlers_["QUIT"] = &Session::MessageQuit;
@@ -195,7 +196,7 @@ namespace fbi
 			}
 			else
 			{
-				//cerr<<"!!!: read failed\n";
+				Log.Error("Session", "Bejövő adatok olvasása sikertelen!");
 				Cleanup();
 			}
 		}
@@ -210,7 +211,7 @@ namespace fbi
 			}
 			else
 			{
-				cerr<<"!!!: write failed\n";
+				Log.Error("Session", "Kimenő adatok küldése sikertelen!");
 				Cleanup();
 			}
 		}
@@ -258,7 +259,7 @@ namespace fbi
 			{
 				if(closing_connection_)
 				{
-					//cerr<<"!!!: closing connection\n";
+					Log.Warning("Session", "Kapcsolat bontásra került!");
 					Cleanup();
 				}
 			}

@@ -20,8 +20,8 @@ namespace fbi
 		server::server(boost::asio::io_service& ios, const tcp::endpoint& endpoint)
 			: io_service(ios), acceptor(io_service, endpoint)
 		{
-			cout << "Initializing" << endl;
-			boost::shared_ptr<Session> new_session(new Session(io_service));
+			Log.Notice("Server", "Server indul...");
+			SessionPointer new_session(new Session(io_service));
 			acceptor.async_accept(new_session->GetSocket(), boost::bind(&server::handleaccept, this, new_session,
 				boost::asio::placeholders::error));
 		}
@@ -39,6 +39,7 @@ namespace fbi
 		void server::disconnect()
 		{
 			io_service.stop();
+			Log.Warning("Server", "Kapcsolat bontásra került!");
 		}
 	}
 }

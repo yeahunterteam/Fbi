@@ -41,11 +41,15 @@ namespace fbi
 				"\033[1;34m",
 			};
 
-			//fputs(colorstrings[color], stdout);
 			cout << colorstrings[color];
 		}
 
-		void Notice(const char * source, const char * format, ...)
+		void Notice(const char* source, boost::format fmt)
+		{
+			Notice(source, boost::str(fmt).c_str());
+		}
+
+		void Notice(const char* source, const char* format)
 		{
 			boost::mutex::scoped_lock scoped_lock(mutex);
 			Color(TNORMAL);
@@ -63,7 +67,12 @@ namespace fbi
 			Color(TNORMAL);
 		}
 
-		void Info(const char * source, const char * format, ...)
+		void Info(const char* source, boost::format fmt)
+		{
+			Info(source, fmt.str().c_str());
+		}
+
+		void Info(const char* source, const char* format)
 		{
 			boost::mutex::scoped_lock scoped_lock(mutex);
 			Color(TNORMAL);
@@ -81,7 +90,12 @@ namespace fbi
 			Color(TNORMAL);
 		}
 
-		void Success(const char * source, const char * format, ...)
+		void Success(const char* source, boost::format fmt)
+		{
+			Success(source, fmt.str().c_str());
+		}
+
+		void Success(const char* source, const char* format)
 		{
 			boost::mutex::scoped_lock scoped_lock(mutex);
 			Color(TNORMAL);
@@ -100,7 +114,12 @@ namespace fbi
 			Color(TNORMAL);
 		}
 
-		void Error(const char * source, const char * format, ...)
+		void Error(const char* source, boost::format fmt)
+		{
+			Error(source, fmt.str().c_str());
+		}
+
+		void Error(const char* source, const char* format)
 		{
 			if(log_level < 1)
 				return;
@@ -122,7 +141,12 @@ namespace fbi
 			Color(TNORMAL);
 		}
 
-		void Warning(const char * source, const char * format, ...)
+		void Warning(const char* source, boost::format fmt)
+		{
+			Warning(source, fmt.str().c_str());
+		}
+
+		void Warning(const char* source, const char* format)
 		{
 			if(log_level < 2)
 				return;
@@ -144,7 +168,12 @@ namespace fbi
 			Color(TNORMAL);
 		}
 
-		void Debug(const char * source, const char * format, ...)
+		void Debug(const char* source, boost::format fmt)
+		{
+			Debug(source, fmt.str().c_str());
+		}
+
+		void Debug(const char* source, const char* format)
 		{
 			if(log_level < 3)
 				return;
@@ -216,6 +245,7 @@ namespace fbi
 		}*/
 
 	protected:
+		boost::format fmt;
 		boost::mutex mutex;
 		uint8 log_level;
 
@@ -225,7 +255,7 @@ namespace fbi
 		inline void Time()
 		{
 			tm* t = localtime(&UNIXTIME);
-			printf("%02u:%02u ", t->tm_hour, t->tm_min);
+			printf("%02u:%02u:%02u ", t->tm_hour, t->tm_min, t->tm_sec);
 		}
 	};
 }
