@@ -7,6 +7,7 @@
 #include "../StdAfx.h"
 using namespace boost::system;
 using boost::asio::ip::tcp;
+using namespace fbi::irc::replies;
 
 namespace fbi
 {
@@ -15,7 +16,7 @@ namespace fbi
 		connection::connection(boost::asio::io_service& ios, string ircHost, unsigned short port, string nick, string user) 
 			: io_service(ios), resolver(ios), socket(ios), sent_registering_packets(false)
 		{
-			Log.Notice("Connection", "Irc rész indítása.");
+			Log.Notice("Irc", "Irc rész indítása.");
 			
 			m_irc_host = ircHost;
 			m_irc_port = port;
@@ -41,7 +42,7 @@ namespace fbi
 
 				error_code error = boost::asio::error::host_not_found;
 
-				Log.Notice("Connection", "Kapcsolódás a szerverhez.");
+				Log.Notice("Irc", "Kapcsolódás a szerverhez.");
 
 				while(error && endpoint_iterator != end)
 				{
@@ -60,9 +61,9 @@ namespace fbi
 				sending = false;
 				connection_status = status::connected;
 
-				Log.Success("Connection", "Kapcsolódás sikeres.");
+				Log.Success("Irc", "Kapcsolódás sikeres.");
 
-				addHandler("376", boost::bind(&connection::handle_registered, shared_from_this(), _1));
+				addHandler(successful_auth, boost::bind(&connection::handle_registered, shared_from_this(), _1));
 
 				receive();
 				
@@ -158,7 +159,7 @@ namespace fbi
 				socket.close();
 				connection_status = status::not_connected;
 				io_service.dispatch(on_disconnect);
-				Log.Warning("Connection", "Kapcsolat bontásra került!");
+				Log.Warning("Irc", "Kapcsolat bontásra került!");
 			}
 		}
 
@@ -214,12 +215,12 @@ namespace fbi
 			addHandler(replies::ping, boost::bind(&connection::handle_ping, shared_from_this(), _1));
 
 			// join channels
-			msg.connection->send(1, (boost::format("JOIN %1%") % "#hun_bot").str());
+			msg.connection->send(1, (boost::format("JOIN %1%") % "#schumix2").str());
 		}
 
 		void connection::handle_ping(message const& msg)
 		{
-			string response = (boost::format("PONG %1%") % msg.args).str();
+			string response = (boost::format("PONG :%1%") % msg.args).str();
 			cout << response << endl;
 
 			send(10, response);
@@ -245,6 +246,14 @@ namespace fbi
 			}
 			else
 			{
+				boost::regex PingRegex("^PING\\s[:](.+)");
+
+				if(boost::regex_search(info.c_str(), match, PingRegex))
+				{
+					string response = (boost::format("PONG :%1%") % match[1]).str();
+					send(10, response);
+				}
+
 				boost::regex secondRegex("^(\\S+)\\s[:](\\S+)");
 
 				if(boost::regex_search(info.c_str(), match, secondRegex))
@@ -278,7 +287,7 @@ namespace fbi
 					}
 					else
 					{
-						Log.Error("Connection", "Nem sikerült az irc üzenetet szétvágni!");
+						Log.Error("Irc", "Nem sikerült az irc üzenetet szétvágni!");
 						return;
 					}
 				}
@@ -300,7 +309,7 @@ namespace fbi
 			boost::unordered_map<string, opcode_handler>::iterator it = handlers.find(mess.opcode);
 			if(it == handlers.end())
 			{
-				Log.Notice("Connection", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode);
+				Log.Notice("Irc", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode);
 				return;
 			}
 

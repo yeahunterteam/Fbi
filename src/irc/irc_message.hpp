@@ -26,7 +26,7 @@ namespace fbi
 			string host; // fbi.the.host
 
 			string full;
-			boost::shared_ptr<connection> connection;
+			ConnectionPointer connection;
 		};
 
 		struct net_message

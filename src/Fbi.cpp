@@ -83,7 +83,7 @@ int main(/*int argc, char* argv[]*/)
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &ios));
 
 	io_service io;
-	ConnectionPointer conn(new connection(io, "irc.rizon.net", 6667, "Kyrax", "Kyrax"));
+	ConnectionPointer conn(new connection(io, "irc.yeahunter.hu", 6667, "fbi-teszt", "fbi-teszt"));
 	conn->run();
 	conn->connect();
 	boost::thread t2(boost::bind(&boost::asio::io_service::run, &io));
