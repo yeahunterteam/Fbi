@@ -18,13 +18,15 @@ namespace fbi
 	namespace network
 	{
 		class server;
-		class Session;
+		class session;
+		class ChatParticipant;
 
 		typedef boost::shared_ptr<server> ServerPointer;
-		typedef boost::shared_ptr<Session> SessionPointer;
+		typedef boost::shared_ptr<session> SessionPointer;
+		typedef boost::shared_ptr<ChatParticipant> ChatParticipantPtr;
 
 		//#define NULLSERV							boost::shared_ptr<server>()
-		//#define NULLSESS							boost::shared_ptr<Session>()
+		//#define NULLSESS							boost::shared_ptr<session>()
 	}
 }
 

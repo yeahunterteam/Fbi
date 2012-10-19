@@ -21,7 +21,7 @@ namespace fbi
 			: io_service(ios), acceptor(io_service, endpoint)
 		{
 			Log.Notice("Server", "Server indul...");
-			SessionPointer new_session(new Session(io_service));
+			SessionPointer new_session(new session(io_service));
 			acceptor.async_accept(new_session->GetSocket(), boost::bind(&server::handleaccept, this, new_session,
 				boost::asio::placeholders::error));
 		}
@@ -29,6 +29,17 @@ namespace fbi
 		void server::run()
 		{
 			//boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+		}
+
+		void server::handleaccept(SessionPointer current_session, const boost::system::error_code& error)
+		{
+			if(!error)
+			{
+				current_session->start();
+				SessionPointer new_session(new session(io_service));
+				acceptor.async_accept(new_session->GetSocket(), boost::bind(&server::handleaccept, this, new_session,
+					boost::asio::placeholders::error));
+			}
 		}
 
 		server::~server()

@@ -3,6 +3,4 @@
 - Socket rendszeren keresztüli elérés.
 - Ha megvan a socket elérés akkor minden botot úgy választ ki a mag hogy megjönnek az információk és vele a csatorna is. A bot összehasonlítja azon jelenleg fent van-e és ha igen akkor kiírja az üzenetet. Ha még nem akkor felmegy rá és úgy írja ki.
 - Megoldani a csatornák szinkronban tartását a szerverrel úgy hogy ne kelljen hozzá a szervernek külön adatbázis csak a memóriában tárólja az adatokat.
-- Session kisbetüre alakítása.
-- Connection átnevezése irc-re.
 - weboldalon a todo szinkronizálása.

@@ -6,16 +6,18 @@ namespace fbi
 {
 	namespace network
 	{
+		using namespace boost::system;
 		using boost::asio::ip::tcp;
 
-		class Session : public ChatParticipant, public boost::enable_shared_from_this<Session>
+		class session : public ChatParticipant, public boost::enable_shared_from_this<session>
 		{
 		public:
-			Session(boost::asio::io_service& io_service);
+			session(boost::asio::io_service& io_service);
+			~session();
 
-			void Start();
-			void Deliver(const string& msg);
-			void Deliver(const ChatMessage& msg);
+			void start();
+			void deliver(const string& msg);
+			void deliver(const ChatMessage& msg);
 
 			static const int PingInterval = 300; // 5 miniutes
 
@@ -33,7 +35,7 @@ namespace fbi
 			/*void MessageQuit(const string& command_id, const string& data, string& answer)
 			{
 				//cerr<<"!!!: quit\n";
-				Cleanup();
+				cleanup();
 			}
 
 			void MessagePing(const string& command_id, const string& data, string& answer)
@@ -44,7 +46,7 @@ namespace fbi
 				if(!ping_sent_)
 				{
 					connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-					connection_timeout_.async_wait(boost::bind(&Session::HandleConnectionTimeout, shared_from_this(),
+					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 								boost::asio::placeholders::error));
 				}
 			}
@@ -56,23 +58,23 @@ namespace fbi
 				{
 					ping_sent_ = false;
 					connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-					connection_timeout_.async_wait(boost::bind(&Session::HandleConnectionTimeout, shared_from_this(),
+					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 								boost::asio::placeholders::error));
 				}
 				answer = strstr.str();
 			}*/
 
-			void HandleCommand(const string& command_data);
-			void HandleRead(const boost::system::error_code& error);
-			void HandleWrite(const boost::system::error_code& error);
-			void HandleRegisterTimeout(const boost::system::error_code& error);
-			void HandleConnectionTimeout(const boost::system::error_code& error);
+			void handle_command(const string& command_data);
+			void handle_read(const error_code& error);
+			void handle_write(const error_code& error);
+			void HandleRegisterTimeout(const error_code& error);
+			void HandleConnectionTimeout(const error_code& error);
 
 			void WriteNextMessage();
-			void Cleanup();
+			void cleanup();
 
 		private:
-			typedef void (Session::*MessageHandler)(const string& command_id, const string& data, string& answer);
+			typedef void (session::*MessageHandler)(const string& command_id, const string& data, string& answer);
 
 			tcp::socket socket_;
 			boost::asio::streambuf buffer_;
@@ -87,7 +89,5 @@ namespace fbi
 			map<string, MessageHandler> registration_handlers_;
 			map<string, MessageHandler> message_handlers_;
 		};
-
-		typedef boost::shared_ptr<Session> SessionPtr;
 	}
 }

@@ -10,9 +10,7 @@ namespace fbi
 		{
 		public:
 			virtual ~ChatParticipant() {}
-			virtual void Deliver(const ChatMessage& msg) = 0;
+			virtual void deliver(const ChatMessage& msg) = 0;
 		};
-
-		typedef boost::shared_ptr<ChatParticipant> ChatParticipantPtr;
 	}
 }

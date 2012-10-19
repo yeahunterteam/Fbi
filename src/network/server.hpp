@@ -11,7 +11,7 @@ namespace fbi
 {
 	namespace network
 	{
-		class Session;
+		class session;
 
 		class server : public boost::enable_shared_from_this<server>
 		{
@@ -24,16 +24,7 @@ namespace fbi
 			void disconnect();
 			void run();
 
-			void handleaccept(boost::shared_ptr<Session> current_session, const boost::system::error_code& error)
-			{
-				if(!error)
-				{
-					current_session->Start();
-					SessionPointer new_session(new Session(io_service));
-					acceptor.async_accept(new_session->GetSocket(), boost::bind(&server::handleaccept, this, new_session,
-						boost::asio::placeholders::error));
-				}
-			}
+			void handleaccept(SessionPointer current_session, const boost::system::error_code& error);
 
 		private:
 			boost::asio::io_service io_s;

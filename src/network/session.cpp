@@ -10,37 +10,42 @@ namespace fbi
 {
 	namespace network
 	{
-		Session::Session(boost::asio::io_service& io_service) : socket_(io_service), initialized_(false), authorized_(false),
+		session::session(boost::asio::io_service& io_service) : socket_(io_service), initialized_(false), authorized_(false),
 			register_timeout_(io_service), connection_timeout_(io_service), closing_connection_(false), ping_sent_(false)
 		{
 			Log.Notice("Session", "Session indul...");
 			Log.Notice("Session", "Összes handler regisztrálása.");
-			registration_handlers_["CONNECT"] = &Session::MessageConnect;
-			message_handlers_["ASDD"] = &Session::MessageIgnore;
-			/*message_handlers_["QUIT"] = &Session::MessageQuit;
-			message_handlers_["PING"] = &Session::MessagePing;
-			message_handlers_["PONG"] = &Session::MessagePong;*/
+			registration_handlers_["CONNECT"] = &session::MessageConnect;
+			message_handlers_["ASDD"] = &session::MessageIgnore;
+			/*message_handlers_["QUIT"] = &session::MessageQuit;
+			message_handlers_["PING"] = &session::MessagePing;
+			message_handlers_["PONG"] = &session::MessagePong;*/
 		}
 
-		void Session::Start()
+		session::~session()
+		{
+			cleanup();
+		}
+
+		void session::start()
 		{
 			initialized_ = true;
 			register_timeout_.expires_from_now(boost::posix_time::seconds(5));
-			register_timeout_.async_wait(boost::bind(&Session::HandleRegisterTimeout, shared_from_this(), boost::asio::placeholders::error));
-			boost::asio::async_read_until(socket_, buffer_, '\n', boost::bind(&Session::HandleRead, shared_from_this(),
+			register_timeout_.async_wait(boost::bind(&session::HandleRegisterTimeout, shared_from_this(), boost::asio::placeholders::error));
+			boost::asio::async_read_until(socket_, buffer_, '\n', boost::bind(&session::handle_read, shared_from_this(),
 				boost::asio::placeholders::error));
 		}
 
-		void Session::Deliver(const string& msg)
+		void session::deliver(const string& msg)
 		{
 			if(msg.empty())
 				return;
 
 			ChatMessage info(new string(msg));
-			Deliver(info);
+			deliver(info);
 		}
 
-		void Session::Deliver(const ChatMessage& msg)
+		void session::deliver(const ChatMessage& msg)
 		{
 			if(!msg || msg->empty())
 				return;
@@ -53,7 +58,7 @@ namespace fbi
 				WriteNextMessage();
 		}
 
-		void Session::Authorize()
+		void session::Authorize()
 		{
 			//if(bridge_.Authorize(nick_, password_))
 			//{
@@ -61,7 +66,7 @@ namespace fbi
 				authorized_ = true;
 				register_timeout_.cancel();
 				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-				connection_timeout_.async_wait(boost::bind(&Session::HandleConnectionTimeout, shared_from_this(),
+				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 					boost::asio::placeholders::error));
 				stringstream strstr;
 				//WriteServerHeader(strstr, "001")<<":Hi "<<nick_<<"\n";
@@ -80,20 +85,20 @@ namespace fbi
 				//	}
 				//}
 				strstr << "asd" << " " << "meg asd" << "\n";
-				Deliver(strstr.str());
+				deliver(strstr.str());
 			//}
 			//else
 			//{
 				//cerr<<"!!!: auth failed\n";
-			//	Cleanup();
+			//	cleanup();
 			//}
 		}
 
-		void Session::MessageIgnore(const string& command_id, const string& data, string& answer)
+		void session::MessageIgnore(const string& command_id, const string& data, string& answer)
 		{
 		}
 
-		void Session::MessageUnknown(const string& command_id, const string& data, string& answer)
+		void session::MessageUnknown(const string& command_id, const string& data, string& answer)
 		{
 			stringstream strstr;
 			//WriteServerHeader(strstr, "421")<<command_id<<" :Command "<<command_id<<" is unknown or unsupported"<<"\n";
@@ -101,18 +106,18 @@ namespace fbi
 			answer = strstr.str();
 		}
 
-		void Session::MessageConnect(const string& command_id, const string& data, string& answer)
+		void session::MessageConnect(const string& command_id, const string& data, string& answer)
 		{
 			Authorize();
 		}
 
-		/*void Session::MessageQuit(const string& command_id, const string& data, string& answer)
+		/*void session::MessageQuit(const string& command_id, const string& data, string& answer)
 		{
 			//cerr<<"!!!: quit\n";
-			Cleanup();
+			cleanup();
 		}
 
-		void Session::MessagePing(const string& command_id, const string& data, string& answer)
+		void session::MessagePing(const string& command_id, const string& data, string& answer)
 		{
 			stringstream strstr;
 			WriteServerHeaderNoNick(strstr, "PONG")<<bridge_.GetServerName()<<" :"<<data<<"\n";
@@ -120,25 +125,25 @@ namespace fbi
 			if(!ping_sent_)
 			{
 				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-				connection_timeout_.async_wait(boost::bind(&Session::HandleConnectionTimeout, shared_from_this(),
+				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 					boost::asio::placeholders::error));
 			}
 		}
 
-		void Session::MessagePong(const string& command_id, const string& data, string& answer)
+		void session::MessagePong(const string& command_id, const string& data, string& answer)
 		{
 			stringstream strstr;
 			if(ping_sent_)
 			{
 				ping_sent_ = false;
 				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-				connection_timeout_.async_wait(boost::bind(&Session::HandleConnectionTimeout, shared_from_this(),
+				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 					boost::asio::placeholders::error));
 			}
 			answer = strstr.str();
 		}*/
 
-		void Session::HandleCommand(const string& command_data)
+		void session::handle_command(const string& command_data)
 		{
 			if(command_data.empty())
 				return;
@@ -158,7 +163,7 @@ namespace fbi
 				else
 					MessageUnknown(command, data, answer);
 
-				Deliver(answer);
+				deliver(answer);
 			}
 			else
 			{
@@ -171,11 +176,11 @@ namespace fbi
 				else
 					MessageUnknown(command, data, answer);
 
-				Deliver(answer);
+				deliver(answer);
 			}
 		}
 
-		void Session::HandleRead(const boost::system::error_code& error)
+		void session::handle_read(const boost::system::error_code& error)
 		{
 			if(!error)
 			{
@@ -186,22 +191,22 @@ namespace fbi
 				if(line.length() > 0 && line[line.length()-1] == '\r')
 					line.resize(line.length()-1);
 
-				HandleCommand(line);
+				handle_command(line);
 
 				if(socket_.is_open())
 				{
-					boost::asio::async_read_until(socket_, buffer_, '\n', boost::bind(&Session::HandleRead, shared_from_this(),
+					boost::asio::async_read_until(socket_, buffer_, '\n', boost::bind(&session::handle_read, shared_from_this(),
 						boost::asio::placeholders::error));
 				}
 			}
 			else
 			{
 				Log.Error("Session", "Bejövő adatok olvasása sikertelen!");
-				Cleanup();
+				cleanup();
 			}
 		}
 
-		void Session::HandleWrite(const boost::system::error_code& error)
+		void session::handle_write(const boost::system::error_code& error)
 		{
 			if(!error)
 			{
@@ -212,60 +217,60 @@ namespace fbi
 			else
 			{
 				Log.Error("Session", "Kimenő adatok küldése sikertelen!");
-				Cleanup();
+				cleanup();
 			}
 		}
 
-		void Session::HandleRegisterTimeout(const boost::system::error_code& error)
+		void session::HandleRegisterTimeout(const boost::system::error_code& error)
 		{
 			if(!error)
 			{
 				closing_connection_ = true;
-				Deliver("ERROR: registration timeout\n");
+				deliver("ERROR: registration timeout\n");
 			}
 		}
 
-		void Session::HandleConnectionTimeout(const boost::system::error_code& error)
+		void session::HandleConnectionTimeout(const boost::system::error_code& error)
 		{
 			if(!error)
 			{
 				if(ping_sent_)
 				{
 					closing_connection_ = true;
-					Deliver("ERROR: connection timeout\n");
+					deliver("ERROR: connection timeout\n");
 				}
 				else
 				{
 					ping_sent_ = true;
 					connection_timeout_.expires_from_now(boost::posix_time::seconds(30));
-					connection_timeout_.async_wait(boost::bind(&Session::HandleConnectionTimeout, shared_from_this(),
+					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 						boost::asio::placeholders::error));
 					stringstream strstr;
 					strstr<<"PING :"/*<<bridge_.GetServerName()*/<<"\n";
-					Deliver(strstr.str());
+					deliver(strstr.str());
 				}
 			}
 		}
 
-		void Session::WriteNextMessage()
+		void session::WriteNextMessage()
 		{
 			if(!write_msgs_.empty())
 			{
 				//cout<<(*write_msgs_.front());
 				boost::asio::async_write(socket_, boost::asio::buffer(write_msgs_.front()->c_str(), write_msgs_.front()->length()),
-					boost::bind(&Session::HandleWrite, shared_from_this(), boost::asio::placeholders::error));
+					boost::bind(&session::handle_write, shared_from_this(), boost::asio::placeholders::error));
 			}
 			else
 			{
 				if(closing_connection_)
 				{
 					Log.Warning("Session", "Kapcsolat bontásra került!");
-					Cleanup();
+					cleanup();
 				}
 			}
 		}
 
-		void Session::Cleanup()
+		void session::cleanup()
 		{
 			if(initialized_)
 			{
