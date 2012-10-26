@@ -14,12 +14,22 @@ namespace fbi
 			register_timeout_(io_service), connection_timeout_(io_service), closing_connection_(false), ping_sent_(false)
 		{
 			Log.Notice("Session", "Session indul...");
+			// konfigból jöjjön majd az ip vagy az ip-k
+			enabledlist_.push_back("127.0.0.1");
+			vector<string>::iterator it;
+			string ips;
+
+			for(it = enabledlist_.begin(); it != enabledlist_.end(); it++)
+				ips = " " + *it;
+
+			Log.Debug("Session", boost::format("A következő ip(k)-ről érhető csak el a program:%1%") % ips);
+
 			Log.Notice("Session", "Összes handler regisztrálása.");
 			registration_handlers_["CONNECT"] = &session::MessageConnect;
 			message_handlers_["ASDD"] = &session::MessageIgnore;
-			/*message_handlers_["QUIT"] = &session::MessageQuit;
+			/*message_handlers_["QUIT"] = &session::MessageQuit;*/
 			message_handlers_["PING"] = &session::MessagePing;
-			message_handlers_["PONG"] = &session::MessagePong;*/
+			message_handlers_["PONG"] = &session::MessagePong;
 		}
 
 		session::~session()
@@ -115,13 +125,14 @@ namespace fbi
 		{
 			//cerr<<"!!!: quit\n";
 			cleanup();
-		}
+		}*/
 
 		void session::MessagePing(const string& command_id, const string& data, string& answer)
 		{
 			stringstream strstr;
-			WriteServerHeaderNoNick(strstr, "PONG")<<bridge_.GetServerName()<<" :"<<data<<"\n";
+			strstr << "PONG " << data << "\n";
 			answer = strstr.str();
+
 			if(!ping_sent_)
 			{
 				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
@@ -133,6 +144,7 @@ namespace fbi
 		void session::MessagePong(const string& command_id, const string& data, string& answer)
 		{
 			stringstream strstr;
+
 			if(ping_sent_)
 			{
 				ping_sent_ = false;
@@ -140,8 +152,9 @@ namespace fbi
 				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 					boost::asio::placeholders::error));
 			}
+
 			answer = strstr.str();
-		}*/
+		}
 
 		void session::handle_command(const string& command_data)
 		{
@@ -154,6 +167,18 @@ namespace fbi
 
 			if(!authorized_)
 			{
+				string ip = boost::lexical_cast<string>(socket_.remote_endpoint().address());
+				cout << ip << endl;
+
+				if(find(enabledlist_.begin(), enabledlist_.end(), ip) == enabledlist_.end())
+				{
+					Log.Warning("Session", boost::format("Nem engedélyezett ip: %1%") % ip);
+					cleanup();
+					return;
+				}
+
+				Log.Success("Session", boost::format("Sikeresen kapcsolódott egy kliens. Ip: %1%") % ip);
+
 				//cout<<command<<" "<<data<<"\n";
 				map<string, MessageHandler>::iterator it = registration_handlers_.find(command);
 				string answer;
@@ -168,6 +193,8 @@ namespace fbi
 			else
 			{
 				//cout<<":"<<nick_<<"!"<<nick_<<" "<<command<<" "<<data<<"\n";
+				cout<< command << " " << data << endl;
+
 				map<string, MessageHandler>::iterator it = message_handlers_.find(command);
 				string answer;
 
@@ -246,7 +273,7 @@ namespace fbi
 					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 						boost::asio::placeholders::error));
 					stringstream strstr;
-					strstr<<"PING :"/*<<bridge_.GetServerName()*/<<"\n";
+					strstr<<"PING :"/*<<bridge_.GetServerName()*/ << "asd\n";
 					deliver(strstr.str());
 				}
 			}

@@ -36,33 +36,10 @@ namespace fbi
 			{
 				//cerr<<"!!!: quit\n";
 				cleanup();
-			}
-
-			void MessagePing(const string& command_id, const string& data, string& answer)
-			{
-				stringstream strstr;
-				WriteServerHeaderNoNick(strstr, "PONG")<<bridge_.GetServerName()<<" :"<<data<<"\n";
-				answer = strstr.str();
-				if(!ping_sent_)
-				{
-					connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
-								boost::asio::placeholders::error));
-				}
-			}
-
-			void MessagePong(const string& command_id, const string& data, string& answer)
-			{
-				stringstream strstr;
-				if(ping_sent_)
-				{
-					ping_sent_ = false;
-					connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
-								boost::asio::placeholders::error));
-				}
-				answer = strstr.str();
 			}*/
+
+			void MessagePing(const string& command_id, const string& data, string& answer);
+			void MessagePong(const string& command_id, const string& data, string& answer);
 
 			void handle_command(const string& command_data);
 			void handle_read(const error_code& error);
@@ -88,6 +65,7 @@ namespace fbi
 			boost::mutex sync_;
 			map<string, MessageHandler> registration_handlers_;
 			map<string, MessageHandler> message_handlers_;
+			vector<string> enabledlist_;
 		};
 	}
 }
