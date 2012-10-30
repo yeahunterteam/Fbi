@@ -4,8 +4,6 @@
 
 #include "../StdAfx.h"
 
-using namespace boost::posix_time;
-
 namespace fbi
 {
 	namespace network
@@ -22,7 +20,6 @@ namespace fbi
 		void session::HandleConnect(const string& command_id, const string& data, string& answer)
 		{
 			authorized_ = true;
-			cliensname = "asd"; // itt majd szedje ki az adatokból.
 			register_timeout_.cancel();
 			connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
 			connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
@@ -39,8 +36,7 @@ namespace fbi
 
 		void session::HandlePing(const string& command_id, const string& data, string& answer)
 		{
-			ptime t(second_clock::local_time());
-			pong(boost::str(boost::format("Sikeres megjött a ping. Szerver idő: %1%") % UnixTime()));
+			pong(boost::str(boost::format("Sikeresen megjött a ping. Szerver idő: %1%") % UnixTime()));
 
 			if(!ping_sent_)
 			{

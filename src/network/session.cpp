@@ -5,7 +5,6 @@
 */
 
 #include "../StdAfx.h"
-
 using namespace boost::posix_time;
 
 namespace fbi
