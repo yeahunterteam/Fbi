@@ -6,6 +6,8 @@
 
 #include "../StdAfx.h"
 
+using namespace boost::posix_time;
+
 namespace fbi
 {
 	namespace network
@@ -23,13 +25,8 @@ namespace fbi
 				ips = " " + *it;
 
 			Log.Debug("Session", boost::format("A következő ip(k)-ről érhető csak el a program:%1%") % ips);
-
-			Log.Notice("Session", "Összes handler regisztrálása.");
-			registration_handlers_["CONNECT"] = &session::MessageConnect;
-			message_handlers_["ASDD"] = &session::MessageIgnore;
-			/*message_handlers_["QUIT"] = &session::MessageQuit;*/
-			message_handlers_["PING"] = &session::MessagePing;
-			message_handlers_["PONG"] = &session::MessagePong;
+			cliensname = "Cliens";
+			InitHandlers();
 		}
 
 		session::~session()
@@ -44,6 +41,17 @@ namespace fbi
 			register_timeout_.async_wait(boost::bind(&session::HandleRegisterTimeout, shared_from_this(), boost::asio::placeholders::error));
 			boost::asio::async_read_until(socket_, buffer_, '\n', boost::bind(&session::handle_read, shared_from_this(),
 				boost::asio::placeholders::error));
+		}
+
+		void session::InitHandlers()
+		{
+			Log.Notice("Session", "Összes handler regisztrálása.");
+			registration_handlers_["CONNECT"] = &session::HandleConnect;
+			message_handlers_["NAME"] = &session::HandleName;
+			message_handlers_["QUIT"] = &session::HandleQuit;
+			message_handlers_["PING"] = &session::HandlePing;
+			message_handlers_["PONG"] = &session::HandlePong;
+			message_handlers_["TESZT"] = &session::HandleIgnore;
 		}
 
 		void session::deliver(const string& msg)
@@ -66,94 +74,6 @@ namespace fbi
 
 			if(!write_in_progress)
 				WriteNextMessage();
-		}
-
-		void session::Authorize()
-		{
-			//if(bridge_.Authorize(nick_, password_))
-			//{
-				//cerr<<"AUTH "<<nick_<<" success\n";
-				authorized_ = true;
-				register_timeout_.cancel();
-				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
-					boost::asio::placeholders::error));
-				stringstream strstr;
-				//WriteServerHeader(strstr, "001")<<":Hi "<<nick_<<"\n";
-				//WriteServerHeader(strstr, "002")<<":Your host is "<<bridge_.GetServerName()<<", running version 0.0.0\n";
-				//WriteServerHeader(strstr, "003")<<":This server was created 0\n";
-				//WriteServerHeader(strstr, "004")<<":"<<bridge_.GetServerName()<<" 0.0.0 - n\n";
-				//WriteServerHeader(strstr, "375")<<":- "<<bridge_.GetServerName()<<" "<<bridge_.GetMOTDStart()<<" -\n";
-				//WriteServerHeader(strstr, "372")<<":- "<<bridge_.GetMOTD()<<"\n";
-				//const string&  auto_join = bridge_.GetAutoJoin();
-				//if(!auto_join.empty())
-				//{
-				//	if(bridge_.JoinChannel(auto_join, shared_from_this()))
-				//	{
-				//		active_channels_.insert(auto_join);
-				//		WriteUserHeaderNoNick(strstr, "JOIN")<<auto_join<<" :"<<auto_join<<"\n";
-				//	}
-				//}
-				strstr << "asd" << " " << "meg asd" << "\n";
-				deliver(strstr.str());
-			//}
-			//else
-			//{
-				//cerr<<"!!!: auth failed\n";
-			//	cleanup();
-			//}
-		}
-
-		void session::MessageIgnore(const string& command_id, const string& data, string& answer)
-		{
-		}
-
-		void session::MessageUnknown(const string& command_id, const string& data, string& answer)
-		{
-			stringstream strstr;
-			//WriteServerHeader(strstr, "421")<<command_id<<" :Command "<<command_id<<" is unknown or unsupported"<<"\n";
-			strstr << "asd" << " " << "meg asd" << "\n";
-			answer = strstr.str();
-		}
-
-		void session::MessageConnect(const string& command_id, const string& data, string& answer)
-		{
-			Authorize();
-		}
-
-		/*void session::MessageQuit(const string& command_id, const string& data, string& answer)
-		{
-			//cerr<<"!!!: quit\n";
-			cleanup();
-		}*/
-
-		void session::MessagePing(const string& command_id, const string& data, string& answer)
-		{
-			stringstream strstr;
-			strstr << "PONG " << data << "\n";
-			answer = strstr.str();
-
-			if(!ping_sent_)
-			{
-				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
-					boost::asio::placeholders::error));
-			}
-		}
-
-		void session::MessagePong(const string& command_id, const string& data, string& answer)
-		{
-			stringstream strstr;
-
-			if(ping_sent_)
-			{
-				ping_sent_ = false;
-				connection_timeout_.expires_from_now(boost::posix_time::seconds(PingInterval));
-				connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
-					boost::asio::placeholders::error));
-			}
-
-			answer = strstr.str();
 		}
 
 		void session::handle_command(const string& command_data)
@@ -179,21 +99,20 @@ namespace fbi
 
 				Log.Success("Session", boost::format("Sikeresen kapcsolódott egy kliens. Ip: %1%") % ip);
 
-				//cout<<command<<" "<<data<<"\n";
+				//cout << command << " " << data << endl;
 				map<string, MessageHandler>::iterator it = registration_handlers_.find(command);
 				string answer;
 
 				if(it != registration_handlers_.end())
 					(this->*it->second)(command, data, answer);
 				else
-					MessageUnknown(command, data, answer);
+					HandleUnknown(command, data, answer);
 
 				deliver(answer);
 			}
 			else
 			{
-				//cout<<":"<<nick_<<"!"<<nick_<<" "<<command<<" "<<data<<"\n";
-				cout<< command << " " << data << endl;
+				cout << command << " " << data << endl;
 
 				map<string, MessageHandler>::iterator it = message_handlers_.find(command);
 				string answer;
@@ -201,7 +120,7 @@ namespace fbi
 				if(it != message_handlers_.end())
 					(this->*it->second)(command, data, answer);
 				else
-					MessageUnknown(command, data, answer);
+					HandleUnknown(command, data, answer);
 
 				deliver(answer);
 			}
@@ -272,9 +191,9 @@ namespace fbi
 					connection_timeout_.expires_from_now(boost::posix_time::seconds(30));
 					connection_timeout_.async_wait(boost::bind(&session::HandleConnectionTimeout, shared_from_this(),
 						boost::asio::placeholders::error));
-					stringstream strstr;
-					strstr<<"PING :"/*<<bridge_.GetServerName()*/ << "asd\n";
-					deliver(strstr.str());
+
+					ptime t(second_clock::local_time());
+					ping(boost::str(boost::format("Szerver idő: %1%") % UnixTime()));
 				}
 			}
 		}
@@ -283,7 +202,7 @@ namespace fbi
 		{
 			if(!write_msgs_.empty())
 			{
-				//cout<<(*write_msgs_.front());
+				//cout << (*write_msgs_.front());
 				boost::asio::async_write(socket_, boost::asio::buffer(write_msgs_.front()->c_str(), write_msgs_.front()->length()),
 					boost::bind(&session::handle_write, shared_from_this(), boost::asio::placeholders::error));
 			}
@@ -306,6 +225,14 @@ namespace fbi
 
 				initialized_ = false;
 			}
+		}
+
+		uint64 session::UnixTime()
+		{
+			ptime t(second_clock::local_time());
+			static const boost::posix_time::ptime unixStart = boost::posix_time::from_time_t(0);
+			uint64 unixTime = (t - unixStart).total_seconds();
+			return unixTime;
 		}
 	}
 }

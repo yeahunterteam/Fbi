@@ -25,6 +25,7 @@ namespace TestCliens
 				writer = new StreamWriter(stream) { AutoFlush = true }; 
 
 				writer.WriteLine("CONNECT");
+				writer.WriteLine("NAME Teszt");
 
 				string inputLine = string.Empty;
 

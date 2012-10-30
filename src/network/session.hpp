@@ -27,20 +27,15 @@ namespace fbi
 			}
 
 		private:
-			void Authorize();
-			void MessageIgnore(const string& command_id, const string& data, string& answer);
-			void MessageUnknown(const string& command_id, const string& data, string& answer);
-			void MessageConnect(const string& command_id, const string& data, string& answer);
+			void HandleIgnore(const string& command_id, const string& data, string& answer);
+			void HandleUnknown(const string& command_id, const string& data, string& answer);
+			void HandleConnect(const string& command_id, const string& data, string& answer);
+			void HandleQuit(const string& command_id, const string& data, string& answer);
+			void HandlePing(const string& command_id, const string& data, string& answer);
+			void HandlePong(const string& command_id, const string& data, string& answer);
+			void HandleName(const string& command_id, const string& data, string& answer);
 
-			/*void MessageQuit(const string& command_id, const string& data, string& answer)
-			{
-				//cerr<<"!!!: quit\n";
-				cleanup();
-			}*/
-
-			void MessagePing(const string& command_id, const string& data, string& answer);
-			void MessagePong(const string& command_id, const string& data, string& answer);
-
+			void InitHandlers();
 			void handle_command(const string& command_data);
 			void handle_read(const error_code& error);
 			void handle_write(const error_code& error);
@@ -49,6 +44,15 @@ namespace fbi
 
 			void WriteNextMessage();
 			void cleanup();
+
+			// egyéb egyszerűsítési módszerek az üzenetek küldéséhez.
+			void success(string msg);
+			void unknown(string msg);
+			void ping(string msg);
+			void pong(string msg);
+			void newname(string msg);
+
+			uint64 UnixTime();
 
 		private:
 			typedef void (session::*MessageHandler)(const string& command_id, const string& data, string& answer);
@@ -62,6 +66,7 @@ namespace fbi
 			boost::asio::deadline_timer connection_timeout_;
 			bool closing_connection_;
 			bool ping_sent_;
+			string cliensname;
 			boost::mutex sync_;
 			map<string, MessageHandler> registration_handlers_;
 			map<string, MessageHandler> message_handlers_;

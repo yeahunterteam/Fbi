@@ -37,6 +37,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/condition.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <boost/cstdint.hpp>
 
