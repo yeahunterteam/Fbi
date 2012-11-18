@@ -49,6 +49,7 @@ namespace fbi
 			boost::function<void ()> on_disconnect;
 			
 			void addHandler(string opcode, opcode_handler handler);
+			void AddChannels(vector<string> ch);
 
 		protected:
 			void handle_resolve(boost::system::error_code const&, tcp::resolver::iterator);
@@ -86,6 +87,8 @@ namespace fbi
 
 			int connection_status;
 			bool sent_registering_packets;
+
+			vector<string> channels;
 			
 			boost::unordered_map<string, opcode_handler> handlers;
 		};

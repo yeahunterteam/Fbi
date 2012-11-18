@@ -37,6 +37,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/condition.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <boost/cstdint.hpp>
@@ -57,6 +58,7 @@ using std::string;
 /* project */
 #include "Log.hpp"
 extern fbi::CLog Log;
+#include "Signal.hpp"
 #include "Fbi.hpp"
 #include "SharedPointer.hpp"
 #include "shutdown_manager.hpp"
@@ -65,6 +67,7 @@ extern fbi::CLog Log;
 #include "irc/irc_connection.hpp"
 #include "network/types.hpp"
 #include "network/participant.hpp"
+#include "network/ircinfo.hpp"
 #include "network/session.hpp"
 #include "network/server.hpp"
 

@@ -215,7 +215,9 @@ namespace fbi
 			addHandler(replies::ping, boost::bind(&connection::handle_ping, shared_from_this(), _1));
 
 			// join channels
-			msg.connection->send(1, (boost::format("JOIN %1%") % "#schumix2").str());
+			for(int i = 0; i < channels.size(); i++)
+				msg.connection->send(1, (boost::format("JOIN %1%") % channels.at(i)).str());
+			//msg.connection->send(1, (boost::format("JOIN %1%") % "#schumix2").str());
 		}
 
 		void connection::handle_ping(message const& msg)
@@ -314,6 +316,13 @@ namespace fbi
 			}
 
 			(it->second)(mess); // call the handler
+		}
+
+		void connection::AddChannels(vector<string> ch)
+		{
+			channels.clear();
+			channels = ch;
+			ch.clear();
 		}
 	}
 }

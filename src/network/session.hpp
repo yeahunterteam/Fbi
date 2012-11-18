@@ -7,6 +7,7 @@ namespace fbi
 	namespace network
 	{
 		using namespace boost::system;
+		using namespace fbi::irc;
 		using boost::asio::ip::tcp;
 
 		class session : public ChatParticipant, public boost::enable_shared_from_this<session>
@@ -34,6 +35,10 @@ namespace fbi
 			void HandlePing(const string& command_id, const string& data, string& answer);
 			void HandlePong(const string& command_id, const string& data, string& answer);
 			void HandleName(const string& command_id, const string& data, string& answer);
+			void HandleMessage(const string& command_id, const string& data, string& answer);
+			void HandleChannelList(const string& command_id, const string& data, string& answer);
+			void HandleAddChannel(const string& command_id, const string& data, string& answer);
+			void HandleRemoveChannel(const string& command_id, const string& data, string& answer);
 
 			void InitHandlers();
 			void handle_command(const string& command_data);
@@ -71,6 +76,9 @@ namespace fbi
 			map<string, MessageHandler> registration_handlers_;
 			map<string, MessageHandler> message_handlers_;
 			vector<string> enabledlist_;
+
+			boost::unordered_map<string, ircinfo> IrcClientMap;
+			boost::unordered_map<string, io_service> IoServiceMap;
 		};
 	}
 }

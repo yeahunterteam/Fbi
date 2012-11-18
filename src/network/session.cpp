@@ -50,6 +50,10 @@ namespace fbi
 			message_handlers_["QUIT"] = &session::HandleQuit;
 			message_handlers_["PING"] = &session::HandlePing;
 			message_handlers_["PONG"] = &session::HandlePong;
+			message_handlers_["MESSAGE"] = &session::HandleMessage;
+			message_handlers_["CHANNELLIST"] = &session::HandleChannelList;
+			message_handlers_["ADDCHANNEL"] = &session::HandleAddChannel;
+			message_handlers_["REMOVECHANNEL"] = &session::HandleAddChannel;
 			message_handlers_["TESZT"] = &session::HandleIgnore;
 		}
 
@@ -115,6 +119,9 @@ namespace fbi
 
 				map<string, MessageHandler>::iterator it = message_handlers_.find(command);
 				string answer;
+
+				if(data.length() > 1 && data.substr(0, 1) == ":")
+					data = data.erase(0, 1);
 
 				if(it != message_handlers_.end())
 					(this->*it->second)(command, data, answer);

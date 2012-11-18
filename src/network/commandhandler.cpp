@@ -3,6 +3,7 @@
  */
 
 #include "../StdAfx.h"
+using namespace boost::asio;
 
 namespace fbi
 {
@@ -61,6 +62,99 @@ namespace fbi
 		{
 			cliensname = data;
 			newname(boost::str(boost::format("Név sikeresen módosítva lett erre: %1%") % cliensname));
+		}
+
+		void session::HandleMessage(const string& command_id, const string& data, string& answer)
+		{
+			// ide amit továbbítok
+		}
+
+		void session::HandleChannelList(const string& command_id, const string& data, string& answer)
+		{
+			cout << data << endl;
+			vector<string> split;
+			vector<string> channels;
+			boost::split(channels, data, boost::is_any_of(","));
+
+			for(int i = 0; i < split.size(); i++)
+			{
+				string text = split.at(i);
+				channels.push_back(text.erase(0, 1));
+			}
+
+			split.clear();
+
+			string nick = "fbi-teszt";
+			string host = "irc.yeahunter.hu";
+			int port = 6667;
+
+			if(channels.size() <= 20)
+			{
+				string nick0 = nick + "-1";
+				ircinfo info;
+				info.channelcout = channels.size();
+				info.channels = channels;
+				info.nick = nick0;
+				info.host = host;
+				info.port = port;
+				info.run(IoServiceMap[nick0]);
+				IrcClientMap[nick0] = info;
+			}
+			else if(channels.size() > 20)
+			{
+				int clientcout = 0;
+				vector<string> ch;
+
+				for(int i = 0; i < channels.size(); i++)
+				{
+					ch.push_back(channels.at(i));
+
+					if(ch.size() == 20)
+					{
+						clientcout++;
+						string nick0 = boost::str(boost::format("%1%-%2%") % nick % clientcout);
+
+						ircinfo info;
+						info.channelcout = ch.size();
+						info.channels = ch;
+						info.nick = nick0;
+						info.host = host;
+						info.port = port;
+						info.run(IoServiceMap[nick0]);
+						IrcClientMap[nick0] = info;
+						ch.clear();
+						Sleep(20000);
+					}
+				}
+
+				if(ch.size() > 0)
+				{
+					clientcout++;
+					string nick0 = boost::str(boost::format("%1%-%2%") % nick % clientcout);
+
+					ircinfo info;
+					info.channelcout = ch.size();
+					info.channels = ch;
+					info.nick = nick0;
+					info.host = host;
+					info.port = port;
+					info.run(IoServiceMap[nick0]);
+					IrcClientMap[nick0] = info;
+					ch.clear();
+				}
+			}
+
+			channels.clear();
+		}
+
+		void session::HandleAddChannel(const string& command_id, const string& data, string& answer)
+		{
+			// ide amit továbbítok
+		}
+
+		void session::HandleRemoveChannel(const string& command_id, const string& data, string& answer)
+		{
+			// ide amit továbbítok
 		}
 	}
 }
