@@ -196,7 +196,7 @@ namespace fbi
 				sent_registering_packets = true;
 			}
 
-			cout << data << endl;
+			//cout << data << endl; // majd ide valamit ha ki akarom íratni majd debugból miket ír ki az irc a botnak.
 		}
 
 		void connection::raw_write(string data)
@@ -217,14 +217,12 @@ namespace fbi
 			// join channels
 			for(int i = 0; i < channels.size(); i++)
 				msg.connection->send(1, (boost::format("JOIN %1%") % channels.at(i)).str());
-			//msg.connection->send(1, (boost::format("JOIN %1%") % "#schumix2").str());
 		}
 
 		void connection::handle_ping(message const& msg)
 		{
 			string response = (boost::format("PONG :%1%") % msg.args).str();
-			cout << response << endl;
-
+			Log.Debug("Irc", boost::format("Ping: %1%") % response);
 			send(10, response);
 		}
 	
@@ -298,7 +296,7 @@ namespace fbi
 
 			mess.connection = shared_from_this();
 
-			try
+			/*try
 			{
 				int opcode = boost::lexical_cast<int>(mess.opcode);
 				cout << "opcode: " << opcode << endl;
@@ -306,12 +304,12 @@ namespace fbi
 			catch(boost::bad_lexical_cast&)
 			{
 
-			}
+			}*/
 
 			boost::unordered_map<string, opcode_handler>::iterator it = handlers.find(mess.opcode);
 			if(it == handlers.end())
 			{
-				Log.Notice("Irc", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode);
+				Log.Debug("Irc", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode);
 				return;
 			}
 

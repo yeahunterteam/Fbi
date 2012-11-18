@@ -58,6 +58,7 @@ namespace fbi
 			void newname(string msg);
 
 			uint64 UnixTime();
+			void StopIrc();
 
 		private:
 			typedef void (session::*MessageHandler)(const string& command_id, const string& data, string& answer);

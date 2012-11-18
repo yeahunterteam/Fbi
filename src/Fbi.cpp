@@ -82,17 +82,10 @@ int main(/*int argc, char* argv[]*/)
 	ServerPointer s(new server(ios, tcp::endpoint(tcp::v4(), 6009)));
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &ios));
 
-	//io_service io;
-	//ConnectionPointer conn(new connection(io, "irc.yeahunter.hu", 6667, "fbi-teszt", "fbi-teszt"));
-	//conn->run();
-	//conn->connect();
-	//boost::thread t2(boost::bind(&boost::asio::io_service::run, &io));
-
 	//cin.get();
 
 	main_shutdown_manager.wait();
 	ios.stop();
-	//io.stop();
 	_UnhookSignals();
 
 	return 0;

@@ -16,25 +16,22 @@ namespace fbi
 
 		struct ircinfo
 		{
-			public:
-				void run(io_service& io)
-				{
-					//io_service io;
-					irc = ConnectionPointer(new connection(io, host, port, nick, nick));
-					irc->run();
-					irc->connect();
-					irc->AddChannels(channels);
-					boost::thread th(boost::bind(&io_service::run, &io));
-					//return
-				}
+		public:
+			void run(io_service& io)
+			{
+				irc = ConnectionPointer(new connection(io, host, port, nick, nick));
+				irc->run();
+				irc->connect();
+				irc->AddChannels(channels);
+				boost::thread th(boost::bind(&io_service::run, &io));
+			}
 
-				int channelcout;
-				vector<string> channels;
-				string nick;
-				string host;
-				int port;
-				ConnectionPointer irc;
-				//io_service io;
+			int channelcout;
+			vector<string> channels;
+			string nick;
+			string host;
+			int port;
+			ConnectionPointer irc;
 		};
 	}
 }

@@ -30,6 +30,7 @@ namespace fbi
 
 		session::~session()
 		{
+			StopIrc();
 			cleanup();
 		}
 
@@ -239,6 +240,12 @@ namespace fbi
 			static const boost::posix_time::ptime unixStart = boost::posix_time::from_time_t(0);
 			uint64 unixTime = (t - unixStart).total_seconds();
 			return unixTime;
+		}
+
+		void session::StopIrc()
+		{
+			for(boost::unordered_map<string, io_service>::iterator it = IoServiceMap.begin(); it != IoServiceMap.end(); ++it)
+				it->second.stop();
 		}
 	}
 }
