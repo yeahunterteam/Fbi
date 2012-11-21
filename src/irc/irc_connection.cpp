@@ -119,7 +119,7 @@ namespace fbi
 			if(ec)
 			{
 				disconnect();
-				throw system_error(ec);
+				//throw system_error(ec); // log kiírás kéne ide
 			}
 
 			sending = false;
@@ -138,7 +138,7 @@ namespace fbi
 			if(ec)
 			{
 				disconnect();
-				throw system_error(ec);
+				//throw system_error(ec); // log kiírás kéne ide
 			}
 
 			istream is(&inc_buffer);
@@ -252,6 +252,7 @@ namespace fbi
 				{
 					string response = (boost::format("PONG :%1%") % match[1]).str();
 					send(10, response);
+					return;
 				}
 
 				boost::regex secondRegex("^(\\S+)\\s[:](\\S+)");
@@ -287,7 +288,7 @@ namespace fbi
 					}
 					else
 					{
-						Log.Error("Irc", "Nem sikerült az irc üzenetet szétvágni!");
+						//Log.Error("Irc", "Nem sikerült az irc üzenetet szétvágni!"); // ideiglenesen kikapcsolva
 						return;
 					}
 				}
@@ -309,7 +310,7 @@ namespace fbi
 			boost::unordered_map<string, opcode_handler>::iterator it = handlers.find(mess.opcode);
 			if(it == handlers.end())
 			{
-				Log.Debug("Irc", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode);
+				//Log.Debug("Irc", boost::format("Ismeretlen opcode kód: %1%") % mess.opcode); // ideiglenesen kikapcsolva
 				return;
 			}
 

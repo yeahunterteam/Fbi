@@ -106,8 +106,8 @@ namespace TestCliens
 
 					if(Info[1].ToLower() == "message")
 					{
-						writer.WriteLine("MESSAGE: Csá irc.");
-						writer.WriteLine("MESSAGE: Irc.");
+						writer.WriteLine("MESSAGE #schumix2 :Csá irc.");
+						writer.WriteLine("MESSAGE #schumix2 :Irc.");
 						Console.WriteLine("Console: Teszt üzenet elküldve.");
 						return true;
 					}

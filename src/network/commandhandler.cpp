@@ -4,6 +4,7 @@
 
 #include "../StdAfx.h"
 using namespace boost::asio;
+using namespace boost::algorithm;
 
 namespace fbi
 {
@@ -66,20 +67,36 @@ namespace fbi
 
 		void session::HandleMessage(const string& command_id, const string& data, string& answer)
 		{
-			// ide amit továbbítok
+			boost::cmatch match;
+			boost::regex Regex("^(.+)\\s[:](.*)");
+
+			if(boost::regex_search(data.c_str(), match, Regex))
+			{
+				for(boost::unordered_map<string, ircinfo>::iterator it = IrcClientMap.begin(); it != IrcClientMap.end(); ++it)
+				{
+					if(std::find(it->second.channels.begin(), it->second.channels.end(), match[1].str()) != it->second.channels.end())
+					{
+						// \n felismerése és szöveg darabolása
+						it->second.irc->send(1, boost::str(boost::format("PRIVMSG %1% :%2%") % match[1].str() % match[2].str()));
+						break;
+					}
+				}
+			}
 		}
 
 		void session::HandleChannelList(const string& command_id, const string& data, string& answer)
 		{
-			cout << data << endl;
+			// megírni hogy a port és az irc szerver is a csatornákkal együt jöjjön át
+
 			vector<string> split;
 			vector<string> channels;
-			boost::split(channels, data, boost::is_any_of(","));
+			boost::split(split, data, boost::is_any_of(","));
 
 			for(int i = 0; i < split.size(); i++)
 			{
 				string text = split.at(i);
-				channels.push_back(text.erase(0, 1));
+				trim(text);
+				channels.push_back(text);
 			}
 
 			split.clear();
@@ -123,7 +140,7 @@ namespace fbi
 						info.run(IoServiceMap[nick0]);
 						IrcClientMap[nick0] = info;
 						ch.clear();
-						Sleep(20000);
+						Sleep(20000); // késleltetés az indításhoz. Majd jöhetne konfigból is akár.
 					}
 				}
 
@@ -149,12 +166,12 @@ namespace fbi
 
 		void session::HandleAddChannel(const string& command_id, const string& data, string& answer)
 		{
-			// ide amit továbbítok
+			// új csatorna hozzáadása oda ahol van üres hely, ha nincs akkor új botot hoz létre
 		}
 
 		void session::HandleRemoveChannel(const string& command_id, const string& data, string& answer)
 		{
-			// ide amit továbbítok
+			// csatorna törlése vagy ha azon bot amiből törölve lett teljesen üres lesz csatorna szempontjából akkor álljon le
 		}
 	}
 }

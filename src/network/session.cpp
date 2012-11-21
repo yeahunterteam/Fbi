@@ -1,8 +1,6 @@
-/*  Copyright (C) 2011 Twl
-	(http://www.github.com/twl)
-
-	Project: http://www.github.com/twl/kyra
-*/
+/*
+ * session.cpp
+ */
 
 #include "../StdAfx.h"
 using namespace boost::posix_time;
@@ -30,7 +28,6 @@ namespace fbi
 
 		session::~session()
 		{
-			StopIrc();
 			cleanup();
 		}
 
@@ -229,6 +226,20 @@ namespace fbi
 			{
 				if(socket_.is_open())
 					socket_.close();
+
+				// megoldani hogy crash nélkül álljanak le (részben megoldva de log üzenet kéne throw helyett)
+				if(IrcClientMap.size() > 0)
+				{
+					for(boost::unordered_map<string, ircinfo>::iterator it = IrcClientMap.begin(); it != IrcClientMap.end(); ++it)
+					{
+						it->second.channels.clear();
+						it->second.irc->disconnect();
+					}
+
+					IrcClientMap.clear();
+					//StopIrc();
+					IoServiceMap.clear();
+				}
 
 				initialized_ = false;
 			}

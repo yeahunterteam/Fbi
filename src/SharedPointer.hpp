@@ -28,6 +28,9 @@ namespace fbi
 		//#define NULLSERV							boost::shared_ptr<server>()
 		//#define NULLSESS							boost::shared_ptr<session>()
 	}
+
+	class Signal;
+	typedef boost::shared_ptr<Signal> SignalPointer;
 }
 
 #endif

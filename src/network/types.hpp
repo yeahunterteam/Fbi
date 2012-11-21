@@ -2,6 +2,9 @@
  * types.hpp
  */
 
+#ifndef _TYPES_HPP
+#define _TYPES_HPP
+
 namespace fbi
 {
 	namespace network
@@ -10,3 +13,5 @@ namespace fbi
 		typedef deque<ChatMessage> ChatMessageQueue;
 	}
 }
+
+#endif

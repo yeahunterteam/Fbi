@@ -61,7 +61,7 @@ extern fbi::CLog Log;
 #include "Signal.hpp"
 #include "Fbi.hpp"
 #include "SharedPointer.hpp"
-#include "shutdown_manager.hpp"
+#include "ShutdownManager.hpp"
 #include "irc/irc_replies.hpp"
 #include "irc/irc_message.hpp"
 #include "irc/irc_connection.hpp"

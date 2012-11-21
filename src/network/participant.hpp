@@ -2,6 +2,9 @@
  * participant.hpp
  */
 
+#ifndef _PARTICIPANT_HPP
+#define _PARTICIPANT_HPP
+
 namespace fbi
 {
 	namespace network
@@ -14,3 +17,5 @@ namespace fbi
 		};
 	}
 }
+
+#endif

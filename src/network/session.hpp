@@ -2,6 +2,9 @@
  * session.hpp
  */
 
+#ifndef _SESSION_HPP
+#define _SESSION_HPP
+
 namespace fbi
 {
 	namespace network
@@ -83,3 +86,5 @@ namespace fbi
 		};
 	}
 }
+
+#endif
