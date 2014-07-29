@@ -31,9 +31,8 @@ namespace TestCliens
 				for(int i = 0; i < 47; i++)
 					channels += ", #schumix" + i;
 
-				writer.WriteLine("CHANNELLIST :{0}", channels.Remove(0, 2));
-
-				//writer.WriteLine("CHANNELLIST :#schumix, #schumix2, #schumixdd, #schumixd, #schumix4444, #schumix44566, #schumix12333, #schumix344656, #schumix56457, #schumixjfgfs, #schumix321kkdl, #schumix12kckd");
+				//writer.WriteLine("CHANNELLIST :{0}", channels.Remove(0, 2));
+				writer.WriteLine("CHANNELLIST :#schumix, #schumix2");
 
 				string inputLine = string.Empty;
 
@@ -49,7 +48,6 @@ namespace TestCliens
 						if(inputLine.Contains("PING"))
 							writer.WriteLine("PONG :asd");
 
-						//writer.WriteLine("PASS csá");
 						Thread.Sleep(1000);
 					}
 

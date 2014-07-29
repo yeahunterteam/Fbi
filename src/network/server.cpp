@@ -21,6 +21,7 @@ namespace fbi
 			: io_service(ios), acceptor(io_service, endpoint)
 		{
 			Log.Notice("Server", "Server indul...");
+			// ne induljon minden kapcsolódásnál új session, ennek megfelelően kell átírni a channelinfo részt is a cleanup() parancsból kivéve a > 0 parancsrészeket (feltétel)
 			SessionPointer new_session(new session(io_service));
 			acceptor.async_accept(new_session->GetSocket(), boost::bind(&server::handleaccept, this, new_session,
 				boost::asio::placeholders::error));
